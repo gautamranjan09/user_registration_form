@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import FormHeader from "./FormHeader";
+import FormFooter from "./FormFooter";
 
 const RegistrationForm = () => {
   // Form state
@@ -14,6 +15,9 @@ const RegistrationForm = () => {
       <div className="w-full backdrop-blur-sm bg-white/70 rounded-2xl shadow-xl border border-white/20 overflow-hidden">
       {/* Header */}
       <FormHeader />
+
+      {/* Footer */}
+      <FormFooter />
       </div>
     </div>
   );
