@@ -7,7 +7,6 @@ import { calculatePasswordStrength, validateEmail, validateName, validatePasswor
 import FormField from "./FormField";
 import PasswordField from "./PasswordField";
 
-
 const RegistrationForm = () => {
   // Form state
   const [formValues, setFormValues] = useState({
@@ -38,7 +37,7 @@ const RegistrationForm = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState(0)
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const [submitStatus, setSubmitStatus] = useState({ type: null, message: "" });
 
   // Handle input changes
@@ -65,49 +64,69 @@ const RegistrationForm = () => {
     validateField(name, value);
   };
 
- 
-   // Field validation
-   const validateField = (fieldName, value) => {
-    let newError = ""
-    
+  // Field validation
+  const validateField = (fieldName, value) => {
+    let newError = "";
+
     switch (fieldName) {
       case "name":
-        newError = validateName(value)
-        break
-        
-      case "email":
-        newError = validateEmail(value)
-        break
-        
-      case "password":
-        newError = validatePassword(value)
-        break
-        
-      default:
-        break
-    }
-    
-    setErrors(prevErrors => ({
-      ...prevErrors,
-      [fieldName]: newError
-    }))
-    
-    setIsValid(prevValid => ({
-      ...prevValid,
-      [fieldName]: newError === ""
-    }))
-    
-    return newError === ""
-  }
+        newError = validateName(value);
+        break;
 
-   // Calculate password strength
-   useEffect(() => {
-    setPasswordStrength(calculatePasswordStrength(formValues.password))
-  }, [formValues.password])
+      case "email":
+        newError = validateEmail(value);
+        break;
+
+      case "password":
+        newError = validatePassword(value);
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [fieldName]: newError,
+    }));
+
+    setIsValid((prevValid) => ({
+      ...prevValid,
+      [fieldName]: newError === "",
+    }));
+
+    return newError === "";
+  };
+
+  // Validate all fields
+  const validateForm = () => {
+    const nameValid = validateField("name", formValues.name);
+    const emailValid = validateField("email", formValues.email);
+    const passwordValid = validateField("password", formValues.password);
+
+    return nameValid && emailValid && passwordValid;
+  };
+
+  // Calculate password strength
+  useEffect(() => {
+    setPasswordStrength(calculatePasswordStrength(formValues.password));
+  }, [formValues.password]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Mark all fields as touched
+    setTouched({
+      name: true,
+      email: true,
+      password: true,
+    });
+
+    // Validate all fields
+    if (!validateForm()) {
+      return;
+    }
 
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
@@ -133,6 +152,28 @@ const RegistrationForm = () => {
         type: "success",
         message: "Registration successful! Welcome aboard.",
       });
+
+      // Reset form
+      setFormValues({
+        name: "",
+        email: "",
+        password: "",
+      });
+      setTouched({
+        name: false,
+        email: false,
+        password: false,
+      });
+      setErrors({
+        name: "",
+        email: "",
+        password: "",
+      });
+      setIsValid({
+        name: false,
+        email: false,
+        password: false,
+      });
     } catch (error) {
       setSubmitStatus({
         type: "error",
@@ -152,18 +193,8 @@ const RegistrationForm = () => {
         {/* Form */}
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-
             {/* Name Field */}
-            <FormField
-              name="name"
-              label="Full Name"
-              value={formValues.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.name}
-              touched={touched.name}
-              isValid={isValid.name}
-            />
+            <FormField name="name" label="Full Name" value={formValues.name} onChange={handleChange} onBlur={handleBlur} error={errors.name} touched={touched.name} isValid={isValid.name} />
 
             {/* Email Field */}
             <FormField
@@ -178,8 +209,8 @@ const RegistrationForm = () => {
               isValid={isValid.email}
             />
 
-             {/* Password Field */}
-             <PasswordField
+            {/* Password Field */}
+            <PasswordField
               value={formValues.password}
               onChange={handleChange}
               onBlur={handleBlur}

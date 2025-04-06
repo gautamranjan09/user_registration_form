@@ -1,6 +1,6 @@
 export const validateName = (value) => {
   if (!value.trim()) return "Name is required";
-  if (value.length < 2) return "Name must be at least 2 characters";
+  if (value.length < 5) return "Name must be at least 5 characters";
   if (value.length > 50) return "Name cannot exceed 50 characters";
   if (!/^[a-zA-Z\s]+$/.test(value)) return "Name can only contain letters and spaces";
   return "";
