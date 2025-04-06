@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormHeader from "./FormHeader";
 import FormFooter from "./FormFooter";
 import SubmitButton from "./SubmitButton";
 import StatusMessage from "./StatusMessage";
-import { validateEmail, validateName, validatePassword } from "../utils/FormValidator";
+import { calculatePasswordStrength, validateEmail, validateName, validatePassword } from "../utils/FormValidator";
 import FormField from "./FormField";
+import PasswordField from "./PasswordField";
 
 
 const RegistrationForm = () => {
@@ -37,6 +38,7 @@ const RegistrationForm = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0)
   const [submitStatus, setSubmitStatus] = useState({ type: null, message: "" });
 
   // Handle input changes
@@ -97,6 +99,12 @@ const RegistrationForm = () => {
     
     return newError === ""
   }
+
+   // Calculate password strength
+   useEffect(() => {
+    setPasswordStrength(calculatePasswordStrength(formValues.password))
+  }, [formValues.password])
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -168,6 +176,17 @@ const RegistrationForm = () => {
               error={errors.email}
               touched={touched.email}
               isValid={isValid.email}
+            />
+
+             {/* Password Field */}
+             <PasswordField
+              value={formValues.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.password}
+              touched={touched.password}
+              isValid={isValid.password}
+              passwordStrength={passwordStrength}
             />
 
             {/* Status Messages */}
