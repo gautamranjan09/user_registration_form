@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import FormHeader from "./FormHeader";
 import FormFooter from "./FormFooter";
 import SubmitButton from "./SubmitButton";
+import StatusMessage from "./StatusMessage";
+import { validateEmail, validateName, validatePassword } from "../utils/FormValidator";
+import FormField from "./FormField";
+
 
 const RegistrationForm = () => {
   // Form state
@@ -11,11 +15,124 @@ const RegistrationForm = () => {
     password: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Form errors state
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
+  // Touch state (track which fields have been interacted with)
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    password: false,
+  });
+
+  // Validity state
+  const [isValid, setIsValid] = useState({
+    name: false,
+    email: false,
+    password: false,
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({ type: null, message: "" });
+
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues({
+      ...formValues,
+      [name]: value,
+    });
+
+    // Validate field on change only if it's been touched
+    if (touched[name]) {
+      validateField(name, value);
+    }
+  };
+
+  // Mark field as touched on blur and validate
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched({
+      ...touched,
+      [name]: true,
+    });
+    validateField(name, value);
+  };
+
+ 
+   // Field validation
+   const validateField = (fieldName, value) => {
+    let newError = ""
+    
+    switch (fieldName) {
+      case "name":
+        newError = validateName(value)
+        break
+        
+      case "email":
+        newError = validateEmail(value)
+        break
+        
+      case "password":
+        newError = validatePassword(value)
+        break
+        
+      default:
+        break
+    }
+    
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [fieldName]: newError
+    }))
+    
+    setIsValid(prevValid => ({
+      ...prevValid,
+      [fieldName]: newError === ""
+    }))
+    
+    return newError === ""
+  }
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      const response = await fetch("https://jsonplaceholder.typicode.com/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formValues.name,
+          email: formValues.email,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Registration failed");
+      }
+
+      const result = await response.json();
+      console.log("Registration successful:", result);
+
+      setSubmitStatus({
+        type: "success",
+        message: "Registration successful! Welcome aboard.",
+      });
+    } catch (error) {
+      setSubmitStatus({
+        type: "error",
+        message: error.message || "Registration failed. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -27,6 +144,34 @@ const RegistrationForm = () => {
         {/* Form */}
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+
+            {/* Name Field */}
+            <FormField
+              name="name"
+              label="Full Name"
+              value={formValues.name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.name}
+              touched={touched.name}
+              isValid={isValid.name}
+            />
+
+            {/* Email Field */}
+            <FormField
+              name="email"
+              label="Email Address"
+              type="email"
+              value={formValues.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.email}
+              touched={touched.email}
+              isValid={isValid.email}
+            />
+
+            {/* Status Messages */}
+            <StatusMessage status={submitStatus} />
             {/* Submit Button */}
             <SubmitButton isSubmitting={isSubmitting} />
           </form>
