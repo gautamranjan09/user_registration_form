@@ -3,12 +3,16 @@ import { useState, useEffect } from "react";
 function EnhancedFloatingInput({ name, label, value, onChange, onBlur, error, isValid, type = "text" }) {
   const [isFocused, setIsFocused] = useState(false);
   const [hasValue, setHasValue] = useState(false);
+  const [animateLabel, setAnimateLabel] = useState(false);
 
   useEffect(() => {
     setHasValue(value !== "");
   }, [value]);
 
-  const handleFocus = () => setIsFocused(true);
+  const handleFocus = () => {
+    setIsFocused(true);
+    setAnimateLabel(true);
+  };
 
   const handleBlur = (e) => {
     setIsFocused(false);
@@ -39,20 +43,27 @@ function EnhancedFloatingInput({ name, label, value, onChange, onBlur, error, is
       return "border-indigo-300 focus:border-indigo-600 focus:ring focus:ring-indigo-200";
     }
 
-    return "border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200";
+    return "border-gray-300 hover:border-indigo-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200";
   };
 
   return (
-    <div className="relative">
+    <div className="relative group hover-float w-full">
       <label
         htmlFor={name}
         style={{
+          position: 'absolute',
           top: isFocused || hasValue ? "-12px" : "50%",
           fontSize: isFocused || hasValue ? "0.75rem" : "0.875rem",
           color: getLabelColor(),
-          transition: "all 0.2s ease",
+          transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          transform: isFocused || hasValue ? "translateY(0)" : "translateY(-50%)",
+          padding: "0 0.25rem",
+          backgroundColor: "white",
+          marginLeft: "0.75rem",
+          zIndex: 10,
+          pointerEvents: "none",
         }}
-        className="absolute left-3 transform -translate-y-1/2 pointer-events-none bg-white px-1 z-10"
+        className={`${animateLabel ? "transition-all duration-300" : ""}`}
       >
         {label}
       </label>
@@ -64,8 +75,15 @@ function EnhancedFloatingInput({ name, label, value, onChange, onBlur, error, is
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={`block w-full px-3 py-3 rounded-lg border ${getBorderClasses()} outline-none transition-all duration-200`}
+        className={`block w-full px-3 py-3 rounded-lg border ${getBorderClasses()} glass-input outline-none transition-all duration-300 ${
+          isFocused ? "shadow-lg" : "shadow-sm"
+        }`}
       />
+      
+      {/* Enhanced focus indicator with gradient */}
+      {isFocused && (
+        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transform origin-left"></span>
+      )}
     </div>
   );
 }

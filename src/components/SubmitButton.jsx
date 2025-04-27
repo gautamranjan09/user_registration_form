@@ -1,3 +1,4 @@
+// src/components/SubmitButton.jsx
 import React from "react";
 
 function SubmitButton({ isSubmitting }) {
@@ -5,9 +6,11 @@ function SubmitButton({ isSubmitting }) {
     <button
       type="submit"
       disabled={isSubmitting}
-      className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
-        isSubmitting ? "bg-gray-400" : "bg-gradient-to-r from-rose-500 to-teal-500 hover:from-rose-600 hover:to-teal-600"
-      }`}
+      className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all duration-300 
+        ${isSubmitting 
+          ? "bg-gray-400 cursor-not-allowed" 
+          : "gradient-btn"
+        }`}
     >
       {isSubmitting ? (
         <div className="flex items-center justify-center">
@@ -18,7 +21,7 @@ function SubmitButton({ isSubmitting }) {
           Registering...
         </div>
       ) : (
-        "Register"
+        <span className="relative z-10 font-semibold tracking-wide">Register</span>
       )}
     </button>
   );
